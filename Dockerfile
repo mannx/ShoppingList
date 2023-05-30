@@ -1,9 +1,17 @@
 # Build Stage
 FROM rust:latest
 
-WORKDIR /usr/src/sl
+WORKDIR /src
 
-COPY backend/ common/ frontend/ ./
+# Copy source files over
+COPY backend/ ./backend
+COPY common ./common
+COPY frontend ./frontend
+COPY Cargo* ./
 
-# Common
-RUN cargo install --path . common
+# Setup build environment
+#   Wasm Support
+RUN rustup target add wasm32-unknown-unknown
+
+#   Trunk for frontend building
+RUN cargo install trunk
