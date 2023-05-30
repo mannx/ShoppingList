@@ -1,0 +1,20 @@
+[package]
+name = "backend"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+axum = "0.6.18"
+clap = { version = "4.2.7", features = ["derive"] }
+log = "0.4.17"
+tokio = { version = "1.28.0", features = ["full"] }
+tower = "0.4.13"
+tower-http = { version = "0.4.0", features = ["full"] }
+tracing = "0.1.37"
+tracing-subscriber = "0.3.17"
+common = {version = "0.1.0", path="../common"}
+serde_json="1.0"
+sqlx = {version="0.6.3", features=["runtime-async-std-native-tls","postgres","chrono"] }
+dotenv = "0.15"
