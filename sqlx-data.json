@@ -1,0 +1,33 @@
+{
+  "db": "PostgreSQL",
+  "9321bbfc421505781a2ee1b8e6420c9119906b9bf18b3bdeef16dc3a5db9bbc9": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "item",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "name",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT shoppinglist.id, shoppinglist.item, locations.name FROM shoppinglist INNER JOIN locations ON shoppinglist.location=locations.id"
+  }
+}

@@ -1,0 +1,4 @@
+Prepare sqlx for docker build:
+    - cargo sqlx prepare --merged
+
+Copy over sqlx-data.json to docker build
