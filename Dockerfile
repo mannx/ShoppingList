@@ -18,6 +18,11 @@ RUN rustup target add wasm32-unknown-unknown
 RUN cargo install trunk
 
 #   Build frontend
+#       Outputs to /src/dist
 WORKDIR /src/frontend
 
 RUN trunk build
+
+#   Build backend
+WORKDIR /src/backend
+RUN cargo build --release

@@ -10,6 +10,7 @@ mod prelude {
 
     pub use common::*;
 
+    pub use crate::components::views::locations::*;
     pub use crate::components::views::navbar::*;
     pub use crate::components::views::overview::*;
     pub use crate::components::views::*;
@@ -26,12 +27,26 @@ enum Route {
     #[not_found]
     #[at("/404")]
     NotFound,
+
+    #[at("/locations")]
+    Locations,
+
+    #[at("/locations/delete/:id")]
+    LocationDelete { id: i32 },
+
+    #[at("/locations/new")]
+    AddLocation,
 }
 
 fn switch(routes: Route) -> Html {
     match routes {
         Route::Home => html! {<Overview />},
         Route::NotFound => html! {<div>{"not found"}</div>},
+        Route::Locations => html! {<LocationsList />},
+        Route::LocationDelete { id } => html! {
+            <LocationDelete id={id} />
+        },
+        Route::AddLocation => html! {<AddLocation />},
     }
 }
 

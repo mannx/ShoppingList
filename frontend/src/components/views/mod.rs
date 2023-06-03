@@ -1,2 +1,3 @@
+pub mod locations;
 pub mod navbar;
 pub mod overview;

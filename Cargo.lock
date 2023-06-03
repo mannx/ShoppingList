@@ -336,6 +336,7 @@ dependencies = [
  "common",
  "dotenv",
  "log",
+ "serde",
  "serde_json",
  "sqlx",
  "tokio",
@@ -824,6 +825,7 @@ dependencies = [
  "serde_json",
  "wasm-bindgen-futures",
  "wasm-logger",
+ "web-sys",
  "yew",
  "yew-router",
 ]
