@@ -1,9 +1,11 @@
+mod route;
 mod routes;
+mod types;
 
 mod prelude {
     pub use axum::body::{boxed, Body};
     pub use axum::http::{Response, StatusCode};
-    pub use axum::{response::IntoResponse, routing::get, Json, Router};
+    pub use axum::{response::IntoResponse, routing::get, routing::post, Json, Router};
     pub use clap::Parser;
     pub use dotenv::dotenv;
     pub use serde_json::json;
@@ -16,7 +18,10 @@ mod prelude {
     pub use tower_http::services::ServeDir;
     pub use tower_http::trace::TraceLayer;
 
+    pub use crate::route::location::*;
     pub use crate::routes::*;
+    // pub use crate::types::*;
+    pub use common::*;
 
     #[derive(Clone)]
     pub struct AppState {
@@ -81,6 +86,8 @@ async fn main() {
         .route("/api/health", get(health_check))
         .route("/api/get", get(get_list))
         .route("/api/location/list", get(get_location_list))
+        .route("/api/location/add", post(add_location))
+        .route("/api/test", get(api_test))
         .fallback_service(get(|req| async move {
             match ServeDir::new(&opt.static_dir).oneshot(req).await {
                 Ok(res) => {

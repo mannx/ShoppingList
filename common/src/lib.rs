@@ -29,3 +29,12 @@ pub struct ShoppingData {
     pub item: String,
     pub location: String,
 }
+
+impl Locations {
+    pub fn default() -> Self {
+        Self {
+            id: 0,
+            name: String::from(""),
+        }
+    }
+}

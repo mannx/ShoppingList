@@ -73,15 +73,75 @@ fn show_location_list(data: &Vec<Locations>) -> Html {
     }
 }
 
+#[derive(Properties, PartialEq)]
+struct Props {
+    onsubmit: Callback<Locations>,
+}
+
 #[function_component(AddLocation)]
-pub fn location_add() -> Html {
+pub fn add_location() -> Html {
+    let state = use_state(|| None);
+    let state_clone = state.clone();
+
+    let submit = Callback::from(move |data: Locations| {
+        let state_clone = state_clone.clone();
+
+        spawn_local(async move {
+            let body = serde_json::to_string(&data).unwrap();
+            let resp = Request::post("/api/location/add")
+                .body(body)
+                .header("content-type", "application/json")
+                .send()
+                .await
+                .unwrap();
+
+            let result = resp.json::<ServerResponse<bool>>().await.unwrap();
+            state_clone.set(Some(result));
+        });
+    });
+
+    let msg = match state.as_ref() {
+        None => None,
+        Some(data) => match data.error {
+            false => Some(html! {<div>{"success?"}</div>}),
+            true => Some(html! {<div class={"notification"}>{data.message.clone()}</div>}),
+        },
+    };
+
+    html! {<>
+        {msg}
+        <AddLocationForm onsubmit={submit} />
+            </>
+    }
+}
+
+#[function_component(AddLocationForm)]
+fn location_add(props: &Props) -> Html {
+    let state = use_state(|| Locations::default());
+    let cloned = state.clone();
+
+    let loc_changed = Callback::from(move |e: String| {
+        cloned.set(Locations {
+            id: 0, // we will ignore this in backend
+            name: e,
+        });
+    });
+
+    let form_onsubmit = props.onsubmit.clone();
+    let cloned = state.clone();
+    let onsubmit = Callback::from(move |e: SubmitEvent| {
+        e.prevent_default();
+        let data = (*cloned).clone();
+        form_onsubmit.emit(data);
+    });
+
     html! {
-        <form>
+        <form onsubmit={onsubmit}>
             <h3 class="title">{"Add New Location"}</h3>
             <div class="field">
                 <label class="label">{"Location Name"}</label>
                 <div class="control">
-                    <input class="input" type="text" placeholder="location name" name="name" />
+                    <input class="input" type="text" placeholder="location name" name="name" onchange={loc_changed}/>
                 </div>
             </div>
             <div class="field">

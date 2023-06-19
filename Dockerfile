@@ -1,28 +1,45 @@
+#syntax:docker/dockerfile:1
+
+#
 # Build Stage
-FROM rust:latest
+#
+
+FROM rust:latest AS build
 
 WORKDIR /src
 
 # Copy source files over
-# COPY backend/ ./backend
-# COPY common ./common
-# COPY frontend ./frontend
-# COPY Cargo* ./
 COPY . .
 
 # Setup build environment
 #   Wasm Support
 RUN rustup target add wasm32-unknown-unknown
 
-#   Trunk for frontend building
-RUN cargo install trunk
+#   Build backend
+WORKDIR /src/
+ENV SQLX_OFFLINE true
+RUN cargo build -p backend --release
 
 #   Build frontend
 #       Outputs to /src/dist
+
+#   Install trunk to build frontend
+RUN cargo install trunk
+
 WORKDIR /src/frontend
+RUN trunk build --release
 
-RUN trunk build
+#
+# Deploy Stage
+#
 
-#   Build backend
-WORKDIR /src/backend
-RUN cargo build --release
+FROM alpine
+
+RUN apk update
+
+WORKDIR /
+
+COPY --from=build /src/target/release/backend /backend
+COPY --from=build /src/dist /dist
+
+EXPOSE 8080

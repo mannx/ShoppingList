@@ -1,10 +1,26 @@
 #![allow(non_snake_case)]
 use crate::prelude::*;
-use common::*;
 
 use axum::extract::State;
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
+
+pub async fn api_test(State(state): State<AppState>) -> impl IntoResponse {
+    let query = sqlx::query_as!(Locations, "SELECT * FROM Locations")
+        .fetch_all(&state.db)
+        .await;
+
+    if query.is_err() {
+        log::error!("Unable to fetch items from db!");
+        return Json(json!({"error": "unabel to fetch items"}));
+    }
+
+    let data = query.unwrap();
+
+    let resp = json!(data);
+    log::debug!("{:?}", resp);
+    Json(resp)
+}
 
 pub async fn get_list(State(state): State<AppState>) -> impl IntoResponse {
     let query = sqlx::query_as!(
