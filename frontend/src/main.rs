@@ -9,14 +9,13 @@ mod prelude {
     pub use yew_router::prelude::*;
 
     pub use common::*;
-
-    pub use crate::components::views::locations::*;
-    pub use crate::components::views::navbar::*;
-    pub use crate::components::views::overview::*;
-    pub use crate::components::views::*;
 }
 
-// use crate::views::*;
+use crate::components::views::item::*;
+use crate::components::views::locations::*;
+use crate::components::views::navbar::*;
+use crate::components::views::overview::*;
+
 use prelude::*;
 
 #[derive(Clone, Routable, PartialEq)]
@@ -36,6 +35,9 @@ enum Route {
 
     #[at("/locations/new")]
     AddLocation,
+
+    #[at("/item/new")]
+    NewItem,
 }
 
 fn switch(routes: Route) -> Html {
@@ -47,6 +49,7 @@ fn switch(routes: Route) -> Html {
             <LocationDelete id={id} />
         },
         Route::AddLocation => html! {<AddLocation />},
+        Route::NewItem => html! {<NewItem />},
     }
 }
 

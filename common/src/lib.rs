@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Locations {
     pub id: i32,
     pub name: String,
@@ -35,6 +35,16 @@ impl Locations {
         Self {
             id: 0,
             name: String::from(""),
+        }
+    }
+}
+
+impl<T> ServerResponse<T> {
+    pub fn new(error: bool, message: String) -> Self {
+        Self {
+            error,
+            message: Some(message),
+            data: None,
         }
     }
 }

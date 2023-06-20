@@ -9,6 +9,7 @@ pub fn nav_bar() -> Html {
                 <div class="navbar-start">
                     <a class="navbar-item"><Link<Route> to={Route::Home}>{"Home"}</Link<Route>></a>
                     <a class="navbar-item"><Link<Route> to={Route::Locations}>{"Locations"}</Link<Route>></a>
+                    <a class="navbar-item"><Link<Route> to={Route::NewItem}>{"New Item"}</Link<Route>></a>
                 </div>
             </div>
         </nav>

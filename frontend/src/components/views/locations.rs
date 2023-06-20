@@ -2,6 +2,8 @@ use crate::prelude::*;
 use crate::Route;
 use log::info;
 
+use crate::components::blocks::text_input::*;
+
 #[function_component(LocationsList)]
 pub fn location_list() -> Html {
     let data = use_state(|| None);
@@ -141,7 +143,8 @@ fn location_add(props: &Props) -> Html {
             <div class="field">
                 <label class="label">{"Location Name"}</label>
                 <div class="control">
-                    <input class="input" type="text" placeholder="location name" name="name" onchange={loc_changed}/>
+                    // <input class="input" type="text" placeholder="location name" name="name" onchange={loc_changed}/>
+                    <TextInput class="input" placeholder="location name" name="name" onchange={loc_changed} />
                 </div>
             </div>
             <div class="field">
