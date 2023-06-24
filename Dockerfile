@@ -33,9 +33,17 @@ RUN trunk build --release
 # Deploy Stage
 #
 
-FROM alpine
+# FROM alpine
 
-RUN apk update
+# RUN apk update
+
+# FROM ubuntu
+
+# RUN apt update && apt upgrade -y
+FROM debian:bullseye
+
+# RUN apt-get update && apt-get install -y libssl1.1 && apt clean && rm -rf /var/lib/apt/lists/*
+# RUN apt-get update && apt-get install -y libssl1.1 
 
 WORKDIR /
 
@@ -43,3 +51,6 @@ COPY --from=build /src/target/release/backend /backend
 COPY --from=build /src/dist /dist
 
 EXPOSE 8080
+
+ENTRYPOINT ["/bin/bash", "-c", "-l"]
+# ENTRYPOINT ["/backend"]

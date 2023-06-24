@@ -8,6 +8,7 @@ mod prelude {
     pub use yew::prelude::*;
     pub use yew_router::prelude::*;
 
+    pub use common::server_response::*;
     pub use common::*;
 }
 

@@ -1,0 +1,102 @@
+{
+  "db": "PostgreSQL",
+  "94c595e76af5337c237f3333306e9cd59d88a7a31b2c3239ff443d82566fd2b7": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT * FROM Locations"
+  },
+  "a86cbc79e6ce78d9184fed6bb23f2834fa9e9a1c3acace16d89650a521c7bbf2": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Varchar"
+        ]
+      }
+    },
+    "query": "INSERT INTO Locations (name) VALUES ($1)"
+  },
+  "c8458882755e0c47eede048a9ca0514b4d2bfe8108417b84c965b47fe8c88cb5": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "item",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "location",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT shoppinglist.id, shoppinglist.item, locations.name AS location FROM shoppinglist INNER JOIN locations ON shoppinglist.location=locations.id"
+  },
+  "e4de6720fb004611ddb1d0ef75ca579fe849c8f9dcacd9f0a56a18c89ad196e1": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "SELECT id FROM locations WHERE LOWER(name)=LOWER($1)"
+  },
+  "f74212eda0f9551d723de2bc8aea7b535af71349ac30cf6342408a2d394459ad": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Int4"
+        ]
+      }
+    },
+    "query": "INSERT INTO ShoppingList (item, location) VALUES($1, $2)"
+  }
+}

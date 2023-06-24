@@ -1,5 +1,5 @@
 ---
-# docker compose to startup a development database
+# docker compose to test container with
 
 version: '3.1'
 
@@ -17,6 +17,19 @@ services:
       - ./data:/var/lib/postgresql/data
     ports:
       - '6500:5432'
+  shoplist:
+    image: shoplist:latest
+    restart: always
+    container_name: shoplist
+    environment:
+      PUID: 1000
+      PGID: 1000
+      DATABASE_URL: postgresql://admin:password@db:6500/shoppinglist
+    volumes:
+      - /tmp/shop:/data
+    ports:
+      - 8080:8080
+
 
   # pgAdmin:
   #   image: dpage/pgadmin4
