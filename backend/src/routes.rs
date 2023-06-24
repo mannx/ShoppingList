@@ -12,14 +12,13 @@ pub async fn api_test(State(state): State<AppState>) -> impl IntoResponse {
 
     if query.is_err() {
         log::error!("Unable to fetch items from db!");
-        return Json(json!({"error": "unabel to fetch items"}));
+        return Json(ServerResponse::<Vec<Locations>>::error(String::from(
+            "Unable to fetch items",
+        )));
     }
 
     let data = query.unwrap();
-
-    let resp = json!(data);
-    log::debug!("{:?}", resp);
-    Json(resp)
+    Json(ServerResponse::<Vec<Locations>>::ok(data))
 }
 
 pub async fn get_list(State(state): State<AppState>) -> impl IntoResponse {
@@ -32,9 +31,9 @@ pub async fn get_list(State(state): State<AppState>) -> impl IntoResponse {
 
     if query.is_err() {
         log::error!("Unable to fetch items from db!");
-        return Json(ReturnError::<
-            ServerResponse<HashMap<String, Vec<ShoppingData>>>,
-        >("Unable to fetch items!"));
+        return Json(ServerResponse::<HashMap<String, Vec<ShoppingData>>>::error(
+            String::from("Unable to fetch items"),
+        ));
     }
 
     // for each item combine into a list for each location
@@ -54,12 +53,9 @@ pub async fn get_list(State(state): State<AppState>) -> impl IntoResponse {
         }
     }
 
-    let resp = serde_json::json!(ServerResponse::<HashMap::<String, Vec<ShoppingData>>> {
-        error: false,
-        message: None,
-        data: Some(map),
-    });
-    Json(resp)
+    Json(ServerResponse::<HashMap<String, Vec<ShoppingData>>>::ok(
+        map,
+    ))
 }
 
 pub async fn get_location_list(State(state): State<AppState>) -> impl IntoResponse {
@@ -69,26 +65,11 @@ pub async fn get_location_list(State(state): State<AppState>) -> impl IntoRespon
 
     if query.is_err() {
         log::error!("Unable to fetch items from db!");
-        return Json(ReturnError::<ServerResponse<Vec<Locations>>>(
-            "Unable to fetch items!",
-        ));
+        return Json(ServerResponse::<Vec<Locations>>::error(String::from(
+            "Unable to fetch items",
+        )));
     }
 
     let data = query.unwrap();
-
-    let resp = serde_json::json!(ServerResponse::<Vec<Locations>> {
-        error: false,
-        message: None,
-        data: Some(data),
-    });
-
-    Json(resp)
-}
-
-pub fn ReturnError<T: serde::ser::Serialize>(msg: &str) -> serde_json::Value {
-    serde_json::json!(ServerResponse::<T> {
-        error: true,
-        message: Some(msg.to_owned()),
-        data: None,
-    })
+    Json(ServerResponse::<Vec<Locations>>::ok(data))
 }

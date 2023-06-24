@@ -4,83 +4,119 @@ use web_sys::{EventTarget, HtmlInputElement};
 
 use crate::components::blocks::text_input::*;
 
+#[derive(Default, Clone)]
 struct StateData {
-    pub locations: Vec<Locations>,
-    pub selected_location: i32, // id of location we have selected, defaults to locations[0].id
+    pub message: Option<ServerResponse<bool>>,
+    pub item_name: String,
+    pub store_id: i32,
 }
 
-impl StateData {
-    pub fn new() -> Self {
-        Self {
-            locations: Vec::<Locations>::new(),
-            selected_location: 0,
-        }
-    }
-}
-
-#[function_component(NewItem)]
+#[function_component(NewItemForm)]
 pub fn new_item() -> Html {
-    let data = use_state(|| None);
-    // let data = use_state(|| StateData::new());
-    let form_state = use_state(|| String::from(""));
+    let loc_data = use_state(|| None);
+    let state = use_state(|| StateData::default());
 
     {
-        let data = data.clone();
+        let loc_data = loc_data.clone();
 
         use_effect(move || {
-            if data.is_none() {
+            if loc_data.is_none() {
                 // have we loaded yet?
                 spawn_local(async move {
                     let resp = Request::get("/api/location/list").send().await.unwrap();
                     let result = resp.json::<ServerResponse<Vec<Locations>>>().await.unwrap();
 
-                    data.set(Some(result));
+                    loc_data.set(Some(result));
                 });
             }
             || {}
         });
     }
 
-    match data.as_ref() {
-        None => html! {<div>{"Loading..."}</div>},
+    match loc_data.as_ref() {
+        None => return html! {<div>{"Loading..."}</div>},
         Some(data) => match data.error {
-            true => {
-                html! {<div>{"Error occured: "}{data.message.clone().unwrap_or(String::from("No error message provided"))}</div>}
-            }
-            false => {
-                let data = data.data.clone().unwrap();
-
-                show_new_item(&data, form_state)
-            }
+            true => return html! {<div>{"Error occurred: "}{data.message.clone().unwrap()}</div>},
+            false => (),
         },
     }
-}
 
-fn show_new_item(data: &Vec<Locations>, state: UseStateHandle<String>) -> Html {
+    // state contains valid locations if any from here
+
+    let cloned = state.clone();
     let item_changed = Callback::from(move |e: String| {
-        state.set(e);
+        cloned.set(StateData {
+            item_name: e,
+            ..(*cloned).clone()
+        });
     });
 
+    let cloned = state.clone();
     let on_select = Callback::from(move |e: Event| {
-        log::debug!("select changed!");
-
         let target: EventTarget = e.target().expect("Require target onchange");
-
         let n = target.unchecked_into::<HtmlInputElement>().value();
-        log::debug!("{:?}", n);
+        let val = n.parse::<i32>().unwrap();
+
+        cloned.set(StateData {
+            store_id: val,
+            ..(*cloned).clone()
+        });
     });
+
+    let cloned = state.clone();
+    let on_submit = Callback::from(move |e: SubmitEvent| {
+        log::debug!("Submiting!");
+
+        e.prevent_default();
+
+        let cloned = cloned.clone();
+
+        spawn_local(async move {
+            let data = NewItem {
+                store_id: cloned.store_id,
+                item_name: cloned.item_name.clone(),
+            };
+
+            let body = serde_json::to_string(&data).unwrap();
+            let resp = Request::post("/api/item/add")
+                .body(body)
+                .header("content-type", "application/json")
+                .send()
+                .await
+                .unwrap();
+
+            let result = resp.json::<ServerResponse<bool>>().await.unwrap();
+            cloned.set(StateData {
+                message: Some(result),
+                ..(*cloned).clone()
+            });
+        });
+    });
+
+    let locations = (loc_data.as_ref().unwrap()).data.clone().unwrap();
+
+    let msg = match &state.message {
+        None => html! {},
+        Some(r) => match r.error {
+            false => html! {},
+            true => html! {
+                <div class="notification">
+                {"Error occurred: "}{r.message.clone().unwrap()}
+                </div>
+            },
+        },
+    };
 
     html! {
-        <form>
+        <form onsubmit={on_submit}>
             <h3 class="title">{"Add New Item"}</h3>
+            {msg}
             <div class="field">
                 <div class="control">
                     <select id="store" name="store" onchange={on_select}>
-                    {data.iter().map(|n| html!{
-                      <>
-                          // <input type="radio" id={n.id.to_string()} name={"store"} onchange={&radio_changed}/>{n.name.clone()}
-                          <option value={n.id.to_string()}>{n.name.clone()}</option>
-                      </>
+                    {locations.iter().map(|n| html!{
+                          <option value={n.id.to_string()} >
+                          {n.name.clone()}</option>
                   }).collect::<Vec<Html>>()}
                     </select>
                 </div>
@@ -93,78 +129,9 @@ fn show_new_item(data: &Vec<Locations>, state: UseStateHandle<String>) -> Html {
 
             <div class="field">
                 <div class="control">
-                    <button class="button is-link" type="submit">{"Add"}</button>
+                    <button class="button is-link" type="submit" >{"Add"}</button>
                 </div>
             </div>
         </form>
     }
 }
-// fn show_new_item(data: &Vec<Locations>) -> Html {
-//     let state = use_state(|| None);
-//     let state_clone = state.clone();
-
-//     let submit = Callback::from(move |data: String| {
-//         let state_clone = state_clone.clone();
-
-//         spawn_local(async move {
-//             let body = serde_json::to_string(&data).unwrap();
-//             let resp = Request::post("/api/item/add")
-//                 .body(body)
-//                 .header("content-type", "application/json")
-//                 .send()
-//                 .await
-//                 .unwrap();
-
-//             let result = resp.json::<ServerResponse<bool>>().await.unwrap();
-//             state_clone.set(Some(result));
-//         });
-//     });
-
-//     let msg = match state.as_ref() {
-//         None => None,
-//         Some(data) => match data.error {
-//             false => Some(html! {<div>{"success?"}</div>}),
-//             true => Some(html! {<div class={"notification"}>{data.message.clone()}</div>}),
-//         },
-//     };
-
-//     html! {{msg}}
-// }
-
-// #[derive(Properties, PartialEq)]
-// struct Props {
-//     onsubmit: Callback<String>,
-// }
-
-// #[function_component(AddNewItem)]
-// fn add_new_item(props: &Props) -> Html {
-//     let state = use_state(|| None);
-//     let cloned = state.clone();
-
-//     let item_changed = Callback::from(move |e: String| cloned.set(e));
-
-//     let form_onsubmit = props.onsubmit.clone();
-//     let cloned = state.clone();
-//     let onsubmit = Callback::from(move |e: SubmitEvent| {
-//         e.prevent_default();control
-//         let data = (*cloned).clone();
-//         form_onsubmit.emit(data);
-//     });
-
-//     html! {
-//         <div><h3 class="title">{"Add new item"}</h3>
-//             <div class="control">
-//             {data.iter().map(|n| html!{
-//                                           <>
-//                                               <label class="radio">
-//                                               <input type="radio" name={n.name.clone()}/>{n.name.clone()}
-//                                               </label>
-//                                           </>
-//                                       }).collect::<Vec<Html>>()}
-//             </div>
-//             <div class="control">
-//                 <TextInput class="input" placeholder="location name" name="item" onchange={item_changed} />
-//                 </div>
-//         </div>
-//     }
-// }

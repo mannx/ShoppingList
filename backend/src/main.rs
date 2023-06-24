@@ -18,9 +18,7 @@ mod prelude {
     pub use tower_http::services::ServeDir;
     pub use tower_http::trace::TraceLayer;
 
-    pub use crate::route::location::*;
-    pub use crate::routes::*;
-    // pub use crate::types::*;
+    pub use common::server_response::*;
     pub use common::*;
 
     #[derive(Clone)]
@@ -30,6 +28,10 @@ mod prelude {
 }
 
 use crate::prelude::*;
+
+use crate::route::items::*;
+use crate::route::location::*;
+use crate::routes::*;
 
 #[derive(Parser, Debug)]
 #[clap(name = "server", about = "wasm test server")]
@@ -87,6 +89,7 @@ async fn main() {
         .route("/api/get", get(get_list))
         .route("/api/location/list", get(get_location_list))
         .route("/api/location/add", post(add_location))
+        .route("/api/item/add", post(add_item))
         .route("/api/test", get(api_test))
         .fallback_service(get(|req| async move {
             match ServeDir::new(&opt.static_dir).oneshot(req).await {

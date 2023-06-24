@@ -49,7 +49,7 @@ fn switch(routes: Route) -> Html {
             <LocationDelete id={id} />
         },
         Route::AddLocation => html! {<AddLocation />},
-        Route::NewItem => html! {<NewItem />},
+        Route::NewItem => html! {<NewItemForm />},
     }
 }
 

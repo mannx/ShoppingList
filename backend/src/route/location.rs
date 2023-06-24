@@ -16,37 +16,24 @@ pub async fn add_location(
     let res = sql.fetch_optional(&state.db).await;
 
     match res {
-        Ok(i) => {
-            match i {
-                Some(_) => {
-                    // we have found a match
-                    return Json(ServerResponse::<bool> {
-                        error: true,
-                        message: Some(String::from("Already found in database")),
-                        data: None,
-                    });
-                }
-                None => {}
+        Ok(i) => match i {
+            Some(_) => {
+                return Json(ServerResponse::<bool>::error(String::from(
+                    "Already found in database",
+                )));
             }
-        }
+            None => {}
+        },
 
-        Err(e) => return Json(ServerResponse::<bool>::new(true, e.to_string())),
+        Err(e) => return Json(ServerResponse::<bool>::error(e.to_string())),
     }
 
     let sql = sqlx::query!("INSERT INTO Locations (name) VALUES ($1)", data.name);
     let res = sql.execute(&state.db).await;
 
     let resp = match res {
-        Ok(_) => ServerResponse::<bool> {
-            error: false,
-            message: None,
-            data: Some(true),
-        },
-        Err(e) => ServerResponse::<bool> {
-            error: true,
-            message: Some(e.to_string()),
-            data: None,
-        },
+        Ok(_) => ServerResponse::<bool>::ok(true),
+        Err(e) => ServerResponse::<bool>::error(e.to_string()),
     };
 
     Json(resp)
